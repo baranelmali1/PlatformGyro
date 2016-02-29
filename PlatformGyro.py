@@ -4,8 +4,6 @@ import time
 import math
 import numpy as np
 import scipy.io as sio
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import serial
 
 
@@ -19,8 +17,6 @@ def main():
     joy = ctypes.c_uint(1)
     __vjoy.AcquireVJD(joy)
     
-    Fs = 100; #samples
-    stopTime = 10; #seconds
     t = [];
     exRoll = [];
     exPitch =[];
