@@ -22,7 +22,8 @@ def main():
     exPitch =[];
 
     try:
-        __vjoy.SetAxis(ctypes.c_long(int(5000)), joy, ctypes.c_uint(50)) #Give Throttle
+        __vjoy.SetAxis(ctypes.c_long(int(8000)), joy, ctypes.c_uint(50)) #Give Throttle (Z)
+        __vjoy.SetAxis(ctypes.c_long(int(5000)), joy, ctypes.c_uint(51)) #Give Flight Mode Input (Rx)
         while 1:
             ln = ser.readline().decode('utf-8', errors='ignore').replace('\r\n','').split()
             print(ln)
