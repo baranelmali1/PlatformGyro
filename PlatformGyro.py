@@ -6,6 +6,7 @@ import numpy as np
 import scipy.io as sio
 import serial
 
+logging = True
 
 def main():
     ser = serial.Serial('COM10', 115200, timeout=1) #Please specify here the serial port of the hardware, Example: COM10
@@ -17,9 +18,11 @@ def main():
     joy = ctypes.c_uint(1)
     __vjoy.AcquireVJD(joy)
     
-    t = [];
-    exRoll = [];
-    exPitch =[];
+    if logging:
+        angles = np.ndarray((0,3))
+        t = [];
+        exRoll = [];
+        exPitch =[];
 
     try:
         __vjoy.SetAxis(ctypes.c_long(int(8000)), joy, ctypes.c_uint(50)) #Give Throttle (Z)
@@ -36,19 +39,25 @@ def main():
             elif ln[0] != 'ypr':
                 continue
             angs = [float(i) for i in ln[1:]]
-            angles = np.concatenate((angles, [angs]))
-            
-            t.append(time.time());
+                
             __vjoy.SetAxis(ctypes.c_long(val(angs[2])), joy, ctypes.c_uint(48)) #X Axis for Roll
-            exRoll.append(val(angs[2]));
             __vjoy.SetAxis(ctypes.c_long(val(angs[1])), joy, ctypes.c_uint(49)) #Y Axis for Pitch
-            exPitch.append(val(angs[1]));
+            
+            if logging:
+                angles = np.concatenate((angles, [angs]))
+                t.append(time.time());
+                exRoll.append(val(angs[2]));
+                exPitch.append(val(angs[1]));
+            
     except KeyboardInterrupt:
         __vjoy.SetAxis(ctypes.c_long(int(0)), joy, ctypes.c_uint(50)) #Reset Throttle
         __vjoy.RelinquishVJD(joy)
-        t[:] = [x - min(t) for x in t];
-        sio.savemat('data.mat', {'t':t, 'exRoll':exRoll, 'exPitch':exPitch, 'sensorAngles':angles})
         ser.close()
+        
+        if logging:
+            t[:] = [x - min(t) for x in t];
+            sio.savemat('data.mat', {'t':t, 'exRoll':exRoll, 'exPitch':exPitch, 'sensorAngles':angles})
+        
         
 def val(angle): #Converts angle (degrees) values to 32-bit integer values. 
     #16384 mid, corresponds to 0 degrees
